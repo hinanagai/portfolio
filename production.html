@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production | Hina Nagai</title>
+    
+    <!-- フォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Syne:wght@700;800&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #f0f0f0;
+            --dim-color: #888;
+            --font-head: 'Syne', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-hero: 'Oswald', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-body);
+            overflow: hidden; /* PCは横スクロール */
+            height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        iframe, img { display: block; width: 100%; height: 100%; border: none; }
+        img { object-fit: cover; }
+
+        /* カーソル */
+        .cursor-dot, .cursor-outline {
+            position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+            border-radius: 50%; z-index: 9999; pointer-events: none;
+        }
+        .cursor-dot { width: 8px; height: 8px; background-color: white; }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        body.hovered .cursor-outline {
+            width: 80px; height: 80px; background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px); border-color: transparent;
+        }
+
+        header {
+            height: 100px; padding: 0 5%; display: flex; justify-content: space-between; align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 100; mix-blend-mode: difference;
+        }
+        .brand { font-family: var(--font-head); font-weight: 800; font-size: 1.5rem; text-transform: uppercase; }
+        .back-link { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        /* --- 横スクロールエリア（2列グリッドに変更） --- */
+        .reel-wrapper {
+            display: grid;
+            /* 縦に2行つくる設定 */
+            grid-template-rows: repeat(2, auto);
+            /* 縦が埋まったら右（カラム）に追加していく設定 */
+            grid-auto-flow: column;
+            
+            align-content: center; /* 画面の上下中央に配置 */
+            height: 100vh;
+            
+            padding-left: 5%;
+            padding-right: 10%;
+            gap: 70px 60px; /* 縦の間隔 40px, 横の間隔 60px */
+            
+            overflow-x: auto;
+        }
+        .reel-wrapper::-webkit-scrollbar { display: none; }
+
+        /* タイトルブロックの調整 */
+        .title-block { 
+            grid-row: 1 / -1; /* 1行目から最後まで（つまり縦一杯）を占有させる */
+            align-self: center;
+            margin-right: 80px; 
+            flex-shrink: 0;
+        }
+        .page-title { font-family: var(--font-hero); font-size: clamp(2rem, 4vw, 4rem); line-height: 0.9; text-transform: uppercase; }
+
+        /* アイテム共通 */
+        .item-card {
+            position: relative;
+            transition: transform 0.4s ease;
+            /* grid内でのサイズ確保のため flex-shrink は不要ですが念のため削除または無視されます */
+        }
+        
+        /* 写真用設定（ご指定のサイズ） */
+        .type-photo2 {
+           height: 22vh; 
+           aspect-ratio: 16 / 9;
+        }
+
+         .type-photo {
+           height: 22vh; 
+           aspect-ratio: 9 / 16;
+        }
+
+        /* ホバー時の拡大 */
+        .item-card:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        /* メタ情報（タイトルなど） */
+        .meta {
+            position: absolute;
+            bottom: -40px; left: 0;
+            opacity: 0.7; transition: 0.3s;
+            width: 100%; /* 文字が長くても折り返すように */
+        }
+        .item-card:hover .meta { opacity: 1; transform: translateY(-5px); }
+
+        .client { font-family: var(--font-head); font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 2px;}
+        .role { font-size: 0.75rem; color: var(--dim-color); text-transform: uppercase; letter-spacing: 0.05em; }
+        
+
+        /* スマホ対応 */
+        @media (max-width: 768px) {
+            body { overflow: auto; height: auto; }
+            
+            /* スマホではFlex（縦並び）に戻す */
+            .reel-wrapper { 
+                display: flex; 
+                flex-direction: column; 
+                height: auto; 
+                padding: 150px 5% 100px; 
+                gap: 80px; 
+                align-items: flex-start; 
+            }
+            
+            .title-block { margin-right: 0; margin-bottom: 20px; }
+            .page-title { font-size: 3.5rem; }
+            
+            .item-card { width: 100%; height: auto; margin: 0; aspect-ratio: auto; }
+            
+            /* スマホでの比率設定 */
+            .type-photo2 { width: 100%; height: auto; aspect-ratio: 16/9; }
+
+            .meta { position: static; margin-top: 15px; opacity: 1; bottom: auto; transform: none; }
+            * { cursor: auto !important; }
+            .cursor-dot, .cursor-outline { display: none; }
+        }
+        /* 縦長写真用の設定（2行分を結合） */
+        .type-vertical {
+            /* 1行目から最後まで（2行分）を占有する */
+          grid-row: 1 / -1; 
+    
+           /* 高さの計算： (横長画像の高さ22vh × 2個) + (隙間80px) */
+          height: calc(30vh + 80px); 
+    
+           /* 縦横比 */
+           aspect-ratio: 9 / 16;
+
+           align-self: center;
+         }
+
+        /* --- スマホ対応エリア（@media max-width: 768px の中）の修正 --- */
+        @media (max-width: 768px) {
+        /* ...既存のコード... */
+
+          /* スマホではGrid解除されるので、縦長画像も幅いっぱいにリセット */
+          .type-vertical {
+           width: 100%;
+           height: auto;
+           aspect-ratio: 9/16;
+           grid-row: auto; /* Grid設定を解除 */
+           }
+         }
+        
+    </style>
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <header>
+        <a href="index.html" class="brand">Hina Nagai</a>
+        <a href="index.html" class="back-link">Back to Home</a>
+    </header>
+
+    <div class="reel-wrapper">
+        <div class="title-block">
+            <h1 class="page-title">Production</h1>
+        </div>
+
+        <!-- 
+            ▼ 自動的に「上→下、右の上→右の下…」の順で並びます 
+        -->
+
+        <!-- 01 -->
+        <div class="item-card type-photo2">
+            <img src="production/01.jpg" alt="Production Photo 1">
+            <div class="meta">
+                <span class="client">EARTHGANG <br> ”U Gotta feat.Pharrel”</span>
+                <span class="role">PM</span>
+            </div>
+        </div>
+
+         <!-- 02 -->
+        <div class="item-card type-photo2">
+            <img src="production/026.jpg" alt="Production Photo 3">
+            <div class="meta">
+                <span class="client">MAN ABOUT TOWN</span>
+                <span class="role">PM</span>
+            </div>
+        </div>
+
+        <!-- 03 -->
+        <div class="item-card type-photo2">
+            <img src="production/023.png" alt="Production Photo 2">
+            <div class="meta">
+                <span class="client">PRADA MODE</span>
+                <span class="role">PA</span>
+            </div>
+        </div>
+
+
+         <!-- 04 -->
+        <div class="item-card type-photo2">
+            <img src="production/024.jpg" alt="Production Photo 4">
+            <div class="meta">
+                <span class="client">LOUIS VUITTON</span>
+                <span class="role">PM</span>
+            </div>
+        </div>
+
+         <!-- 05 -->
+        <div class="item-card type-photo2">
+            <img src="production/04.png" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">GENTLE MONSTER</span>
+                <span class="role">PA</span>
+            </div>
+        </div>
+
+        <!-- 06 -->
+        <div class="item-card type-photo2">
+            <img src="production/05.png" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">LUMINE</span>
+                <span class="role">PA</span>
+            </div>
+        </div>
+
+        <!-- 07 -->
+        <div class="item-card type-photo2">
+            <img src="production/012.jpg" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">LIME</span>
+                <span class="role">PA</span>
+            </div>
+        </div>
+
+        <!-- 08 -->
+        <div class="item-card type-photo2">
+            <img src="production/017.png" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">CHIVAS REGAL</span>
+                <span class="role">PA</span>
+            </div>
+        </div>
+
+
+             <!-- 0 -->
+        <div class="item-card type-photo2">
+            <img src="production/06.jpg" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">Travis Japan <br> ”Say I Do"</span>
+                <span class="role">PA</span>
+            </div>
+        </div>
+
+
+             <!-- 0 -->
+        <div class="item-card type-photo2">
+            <img src="production/08.jpg" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">Travis Japan<br> ”Boosy"</span>
+                <span class="role">PA</span>
+            </div>
+        </div>
+
+              <!-- 0 -->
+        <div class="item-card type-vertical">
+            <img src="production/020.jpg" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">UNIQLO Global</span>
+                <span class="role">PM</span>
+            </div>
+        </div>
+
+        <!-- 0 -->
+        <div class="item-card type-vertical">
+            <img src="production/028.jpg" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">TikTok </span>
+                <span class="role">PM</span>
+            </div>
+        </div>
+
+            <!-- 0 -->
+        <div class="item-card type-vertical">
+            <img src="production/027.jpg" alt="Production Photo 5">
+            <div class="meta">
+                <span class="client">Clé de Peau Beauté</span>
+                <span class="role">PA</span>
+            </div>
+        </div>
+
+        
+
+
+    </div>
+
+    <script>
+        const dot = document.querySelector('.cursor-dot');
+        const outline = document.querySelector('.cursor-outline');
+        window.addEventListener('mousemove', e => {
+            if(window.innerWidth > 768) {
+                dot.style.left = e.clientX+'px';
+                dot.style.top = e.clientY+'px';
+                outline.animate({left:e.clientX+'px', top:e.clientY+'px'}, {duration:500, fill:"forwards"});
+            }
+        });
+        
+        // 横スクロール制御
+        const container = document.querySelector('.reel-wrapper');
+        container.addEventListener('wheel', e => {
+            if(window.innerWidth > 768) {
+                e.preventDefault();
+                container.scrollLeft += e.deltaY;
+            }
+        });
+
+        // リンクホバー
+        document.querySelectorAll('a').forEach(l => {
+            l.addEventListener('mouseenter', () => document.body.classList.add('hovered'));
+            l.addEventListener('mouseleave', () => document.body.classList.remove('hovered'));
+        });
+    </script>
+</body>
+</html>
